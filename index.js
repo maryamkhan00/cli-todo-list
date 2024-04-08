@@ -1,39 +1,79 @@
 #! /usr/bin/env node
 import inquirer from "inquirer";
 let tasks = [];
+let firstCondition = true;
 let condition = true;
-while (condition) {
-    let taskList = await inquirer.prompt([
+while (firstCondition) {
+    let userChoice = await inquirer.prompt([
         {
-            name: "toDoList",
-            type: "input",
-            message: "add tasks to your to do list",
-        },
-        {
-            name: "confirmation",
-            type: "confirm",
-            message: "do you want to add more tasks?",
-            default: "false",
+            name: "choices",
+            type: "list",
+            message: "select an option",
+            choices: ["add task", "delete task", "update task", "view task", "exit"],
         },
     ]);
-    tasks.push(taskList.toDoList);
-    condition = taskList.confirmation;
-}
-;
-let removeTask = await inquirer.prompt([
-    {
-        name: "removeTasks",
-        type: "confirm",
-        message: "do you want to remove the last task?",
-        default: "false",
+    if (userChoice.choices === "add task") {
+        while (condition) {
+            let taskList = await inquirer.prompt([
+                {
+                    name: "toDoList",
+                    type: "input",
+                    message: "add tasks to your to do list",
+                },
+                {
+                    name: "confirmation",
+                    type: "confirm",
+                    message: "do you want to add more tasks?",
+                    default: "false",
+                },
+            ]);
+            condition = taskList.confirmation;
+            if (taskList.toDoList === "") {
+                console.log("added tasks cannot be left empty!");
+            }
+            else {
+                tasks.push(taskList.toDoList);
+            }
+        }
     }
-]);
-if (removeTask.removeTasks == true) {
-    tasks.pop();
-    console.log("this is your schedule for today: " + tasks);
-}
-else {
-    console.log("this is your schedule for today: " + tasks);
+    else if (userChoice.choices === "delete task") {
+        console.log(tasks);
+        let removeTask = await inquirer.prompt([
+            {
+                name: "indexNumber",
+                type: "number",
+                message: "enter index of task that you want to remove: ",
+            },
+        ]);
+        let removedTask = tasks.splice(removeTask.indexNumber, 1);
+        console.log("following task has been deleted: " + removedTask);
+    }
+    else if (userChoice.choices === "update task") {
+        console.log(tasks);
+        let changeTask = await inquirer.prompt([
+            {
+                name: "indexNumber",
+                type: "number",
+                message: "enter index of task that you want to update: ",
+            },
+            {
+                name: "newTask",
+                type: "input",
+                message: "enter a new task to be replaced by the selected task",
+            },
+        ]);
+        tasks[changeTask.indexNumber] = changeTask.newTask;
+        console.log("task at index " +
+            changeTask.indexNumber +
+            " is successfuly updated to " +
+            changeTask.newTask);
+    }
+    else if (userChoice.choices === "view task") {
+        console.log("your todos for the day include: " + tasks);
+    }
+    else if (userChoice.choices === "exit") {
+        firstCondition = false;
+    }
 }
 /*understanding Arrays:
 let icecreamFlavors = ["chocolate", "cheesecake", "coffee", "cookies n cream"]; //making an array
